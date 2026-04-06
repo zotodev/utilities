@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CCP Manual Reports Utility</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --fl-brand:         #6264A7;
+  --fl-brand-dark:    #464775;
+  --fl-brand-darker:  #33344A;
+  --fl-brand-light:   #E8E8F0;
+  --fl-brand-subtle:  #F3F2FF;
+  --fl-success:       #107C10;
+  --fl-success-bg:    #DFF6DD;
+
+  --fl-bg:            #F5F5F5;
+  --fl-surface:       #FFFFFF;
+  --fl-surface-2:     #FAFAFA;
+  --fl-border:        #E0E0E0;
+  --fl-border-strong: #C8C6C4;
+  --fl-text-1:        #201F1E;
+  --fl-text-2:        #484644;
+  --fl-text-3:        #605E5C;
+  --fl-text-4:        #979593;
+  --fl-text-disabled: #C8C6C4;
+
+  --shadow-2:  0 1px 2px rgba(0,0,0,0.14), 0 0px 2px rgba(0,0,0,0.12);
+  --shadow-4:  0 2px 4px rgba(0,0,0,0.14), 0 0px 2px rgba(0,0,0,0.12);
+  --shadow-8:  0 4px 8px rgba(0,0,0,0.14), 0 0px 2px rgba(0,0,0,0.12);
+  --shadow-28: 0 14px 28px rgba(0,0,0,0.18), 0 0px 8px rgba(0,0,0,0.12);
+  --shadow-64: 0 32px 64px rgba(0,0,0,0.24), 0 0px 8px rgba(0,0,0,0.1);
+
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --mono: 'Cascadia Code','Consolas',monospace;
+  --r: 6px;
+  --r-sm: 4px;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--fl-bg);
+  color: var(--fl-text-1);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════
+   APP HEADER
+══════════════════════════════════════ */
+.app-bar {
+  background: var(--fl-brand-darker);
+  height: 48px;
+  display: flex; align-items: center;
+  padding: 0 20px; gap: 10px;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: var(--shadow-4);
+}
+.app-bar-icon { display: flex; align-items: center; }
+.app-bar-icon svg { width: 22px; height: 22px; }
+.app-bar-title { font-size: 15px; font-weight: 600; color: #fff; flex: 1; letter-spacing: 0.1px; }
+.app-bar-div { width:1px; height:20px; background:rgba(255,255,255,0.2); }
+.app-bar-env { font-size: 12px; color: rgba(255,255,255,0.65); }
+.app-bar-badge {
+  background: rgba(255,255,255,0.14); color: rgba(255,255,255,0.85);
+  font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ══════════════════════════════════════
+   PAGE LAYOUT
+══════════════════════════════════════ */
+.page { padding: 20px 24px 48px; display: flex; flex-direction: column; gap: 16px; max-width: 1800px; margin: 0 auto; }
+
+/* ══════════════════════════════════════
+   INFO CARD
+══════════════════════════════════════ */
+.info-card {
+  background: var(--fl-surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-4);
+  border: 1px solid var(--fl-border);
+  overflow: hidden;
+}
+.info-card-hero {
+  background: linear-gradient(130deg, #2D2C5E 0%, var(--fl-brand) 55%, #8662C7 100%);
+  padding: 22px 24px 20px;
+  display: flex; align-items: flex-start; gap: 16px;
+  position: relative; overflow: hidden;
+}
+/* decorative circles */
+.info-card-hero::before {
+  content:''; position:absolute; right:-30px; top:-70px;
+  width:220px; height:220px; border-radius:50%;
+  background:rgba(255,255,255,0.05);
+}
+.info-card-hero::after {
+  content:''; position:absolute; right:80px; bottom:-90px;
+  width:180px; height:180px; border-radius:50%;
+  background:rgba(255,255,255,0.04);
+}
+.hero-icon {
+  width: 46px; height: 46px; flex-shrink: 0;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: var(--r);
+  display: flex; align-items: center; justify-content: center;
+}
+.hero-icon svg { width: 22px; height: 22px; color: #fff; }
+.hero-text { flex: 1; }
+.hero-text h2 { font-size: 18px; font-weight: 700; color: #fff; letter-spacing: -0.1px; line-height: 1.2; }
+.hero-text p  { font-size: 13px; color: rgba(255,255,255,0.72); margin-top: 5px; line-height: 1.55; max-width: 700px; }
+.hero-tag {
+  align-self: flex-start; flex-shrink: 0;
+  background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.24);
+  color: rgba(255,255,255,0.9); font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 10px; letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+.info-steps {
+  display: flex; padding: 0; border-top: 1px solid var(--fl-border); overflow: hidden;
+}
+.info-step {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; min-width: 120px;
+  border-right: 1px solid var(--fl-border);
+  position: relative; transition: background 0.12s;
+}
+.info-step:last-child { border-right: none; }
+.info-step:hover { background: var(--fl-surface-2); }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--fl-brand); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.step-body { display: flex; flex-direction: column; }
+.step-title { font-size: 12px; font-weight: 700; color: var(--fl-text-2); line-height: 1.2; }
+.step-sub   { font-size: 11px; color: var(--fl-text-4); margin-top: 1px; }
+
+/* ══════════════════════════════════════
+   COMMAND BAR
+══════════════════════════════════════ */
+.cmd-bar {
+  background: var(--fl-surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-4);
+  border: 1px solid var(--fl-border);
+  padding: 12px 16px;
+  display: flex; align-items: flex-end; gap: 12px;
+}
+.cmd-left { display: flex; align-items: flex-end; gap: 12px; flex: 1; flex-wrap: wrap; }
+.cmd-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.cmd-sep { width:1px; height:32px; background:var(--fl-border); margin: 0 4px; align-self: center; }
+
+.fl-field { display: flex; flex-direction: column; gap: 4px; min-width: 210px; }
+.fl-field label { font-size: 12px; font-weight: 600; color: var(--fl-text-2); }
+.fl-sel-wrap { position: relative; }
+.fl-sel {
+  width: 100%; appearance: none;
+  background: var(--fl-surface);
+  border: 1.5px solid var(--fl-border-strong);
+  border-radius: var(--r-sm);
+  padding: 7px 30px 7px 11px;
+  font-family: var(--font); font-size: 14px; color: var(--fl-text-1);
+  outline: none; cursor: pointer; height: 36px;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.fl-sel:hover:not(:disabled) { border-color: var(--fl-text-3); }
+.fl-sel:focus { border-color: var(--fl-brand); box-shadow: 0 0 0 1px var(--fl-brand); }
+.fl-sel:disabled { color: var(--fl-text-disabled); background: var(--fl-surface-2); }
+.fl-chev {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; color: var(--fl-text-3); display: flex;
+}
+.fl-chev svg { width: 14px; height: 14px; }
+
+/* Buttons */
+.fl-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 16px;
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  border-radius: var(--r-sm); cursor: pointer; outline: none; border: none;
+  transition: background 0.12s, box-shadow 0.12s, border-color 0.12s;
+  white-space: nowrap; letter-spacing: 0.1px;
+}
+.fl-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.fl-btn-ghost {
+  background: transparent; color: var(--fl-text-2);
+  border: 1.5px solid var(--fl-border-strong);
+}
+.fl-btn-ghost:hover:not(:disabled) { background: var(--fl-surface-2); border-color: var(--fl-text-3); }
+.fl-btn-ghost:disabled { color: var(--fl-text-disabled); border-color: var(--fl-border); cursor: default; }
+.fl-btn-primary { background: var(--fl-brand); color: #fff; box-shadow: var(--shadow-2); }
+.fl-btn-primary:hover:not(:disabled) { background: var(--fl-brand-dark); box-shadow: var(--shadow-4); }
+.fl-btn-primary:disabled { background: var(--fl-border); color: var(--fl-text-disabled); box-shadow: none; cursor: default; }
+
+/* ══════════════════════════════════════
+   TABLE CARD
+══════════════════════════════════════ */
+.tbl-card {
+  background: var(--fl-surface);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-4);
+  border: 1px solid var(--fl-border);
+  overflow: hidden;
+}
+.tbl-card-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--fl-border);
+  min-height: 48px; gap: 12px; background: var(--fl-surface);
+}
+.tbl-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: var(--fl-text-2); flex: 1;
+}
+.tbl-title svg { width: 16px; height: 16px; color: var(--fl-brand); flex-shrink: 0; }
+.tbl-meta { font-size: 12px; color: var(--fl-text-4); font-weight: 400; margin-left: 2px; }
+.chip-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+.fl-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  height: 26px; padding: 0 3px 0 10px;
+  background: var(--fl-brand-subtle); border: 1px solid #C7C6EA;
+  border-radius: 13px; font-size: 12px; font-weight: 700;
+  color: var(--fl-brand); font-family: var(--mono); letter-spacing: 0.2px;
+}
+.fl-chip-x {
+  background: none; border: none; cursor: pointer;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--fl-brand); transition: background 0.1s;
+}
+.fl-chip-x:hover { background: rgba(98,100,167,0.16); }
+.fl-chip-x svg { width: 10px; height: 10px; }
+
+.add-cur-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 26px; padding: 0 10px 0 6px;
+  background: none; border: 1.5px dashed var(--fl-border-strong);
+  border-radius: 13px; font-family: var(--font); font-size: 12px; font-weight: 600;
+  color: var(--fl-text-3); cursor: pointer; transition: all 0.12s;
+}
+.add-cur-btn:hover:not(:disabled) { border-color: var(--fl-brand); color: var(--fl-brand); background: var(--fl-brand-subtle); }
+.add-cur-btn:disabled { opacity: 0.4; cursor: default; }
+.add-cur-btn svg { width: 12px; height: 12px; }
+
+/* ══════════════════════════════════════
+   DATA GRID
+══════════════════════════════════════ */
+.grid-wrap { overflow-x: auto; overflow-y: auto; max-height: 440px; }
+table { border-collapse: collapse; width: max-content; min-width: 100%; font-size: 13px; }
+th, td { padding: 0; }
+
+.col-pin { position: sticky; left: 0; z-index: 2; min-width: 205px; max-width: 240px; }
+thead .col-pin { z-index: 3; }
+thead tr { background: #F8F8FA; border-bottom: 2px solid var(--fl-border); position: sticky; top: 0; z-index: 4; }
+th {
+  padding: 0 14px; height: 40px; font-size: 11px; font-weight: 700;
+  color: var(--fl-text-3); text-align: left; white-space: nowrap;
+  letter-spacing: 0.4px; border-right: 1px solid var(--fl-border);
+  text-transform: uppercase; vertical-align: middle;
+}
+th:last-child { border-right: none; }
+th.col-pin { background: #EFEFF5; border-right: 2px solid var(--fl-border-strong); }
+
+tbody tr { border-bottom: 1px solid var(--fl-border); }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover td { background: #F8F8FA !important; }
+
+td.col-pin {
+  padding: 9px 14px; background: var(--fl-surface-2);
+  border-right: 2px solid var(--fl-border); vertical-align: middle;
+}
+.c-disp { font-size: 13px; font-weight: 600; color: var(--fl-text-1); line-height: 1.2; }
+.c-logic { font-size: 11px; font-family: var(--mono); color: var(--fl-text-4); margin-top: 2px; }
+.c-type {
+  display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 700;
+  font-family: var(--mono); background: var(--fl-brand-light); color: var(--fl-brand);
+  padding: 1px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.3px;
+}
+
+td.col-data {
+  padding: 7px 10px; border-right: 1px solid var(--fl-border);
+  vertical-align: middle; min-width: 165px; background: var(--fl-surface);
+}
+td.col-data:last-child { border-right: none; }
+
+/* ══════════════════════════════════════
+   CELL INPUTS
+══════════════════════════════════════ */
+.c-in, .c-sel, .c-ta {
+  width: 100%; font-family: var(--font); font-size: 13px;
+  color: var(--fl-text-1); background: transparent;
+  border: 1.5px solid transparent; border-radius: var(--r-sm);
+  padding: 5px 8px; outline: none;
+  transition: border-color 0.1s, background 0.1s;
+}
+.c-in:hover, .c-sel:hover, .c-ta:hover { border-color: var(--fl-border-strong); background: #FAFAFA; }
+.c-in:focus, .c-sel:focus, .c-ta:focus {
+  border-color: var(--fl-brand); background: var(--fl-brand-subtle);
+  box-shadow: 0 0 0 1px var(--fl-brand);
+}
+.c-sel {
+  appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23605E5C'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; padding-right: 24px;
+}
+.c-num { font-family: var(--mono); }
+.c-ta { resize: vertical; min-height: 50px; font-size: 12px; font-family: var(--mono); }
+.bool-wrap { display: flex; align-items: center; justify-content: center; padding: 6px; }
+.fl-toggle {
+  width: 36px; height: 20px; -webkit-appearance: none; appearance: none;
+  background: var(--fl-border-strong); border-radius: 10px; cursor: pointer;
+  position: relative; transition: background 0.2s; outline: none;
+}
+.fl-toggle::before {
+  content: ''; position: absolute; left: 2px; top: 2px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%;
+  transition: transform 0.2s; box-shadow: var(--shadow-2);
+}
+.fl-toggle:checked { background: var(--fl-brand); }
+.fl-toggle:checked::before { transform: translateX(16px); }
+.fl-toggle:focus { box-shadow: 0 0 0 2px var(--fl-brand-subtle), 0 0 0 4px var(--fl-brand); }
+
+/* ══════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════ */
+.empty {
+  padding: 60px 24px; text-align: center; color: var(--fl-text-4);
+}
+.empty-ico {
+  width: 56px; height: 56px; background: var(--fl-brand-light); border-radius: 50%;
+  margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+}
+.empty-ico svg { width: 26px; height: 26px; color: var(--fl-brand); }
+.empty h3 { font-size: 15px; font-weight: 600; color: var(--fl-text-3); margin-bottom: 5px; }
+.empty p  { font-size: 13px; color: var(--fl-text-4); }
+
+/* ══════════════════════════════════════
+   SCRIM / DIALOG
+══════════════════════════════════════ */
+.scrim {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 200; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s; backdrop-filter: blur(1px);
+}
+.scrim.open { opacity: 1; pointer-events: all; }
+
+.fl-dlg {
+  background: var(--fl-surface); border-radius: var(--r);
+  box-shadow: var(--shadow-64); border: 1px solid var(--fl-border);
+  display: flex; flex-direction: column; max-height: 88vh;
+  transform: scale(0.96) translateY(6px); transition: transform 0.18s;
+}
+.scrim.open .fl-dlg { transform: scale(1) translateY(0); }
+
+.dlg-head { padding: 20px 24px 12px; border-bottom: 1px solid var(--fl-border); flex-shrink: 0; }
+.dlg-head h3 { font-size: 18px; font-weight: 700; color: var(--fl-text-1); letter-spacing: -0.1px; }
+.dlg-head p  { font-size: 13px; color: var(--fl-text-3); margin-top: 4px; }
+.dlg-body { flex: 1; overflow-y: auto; }
+.dlg-foot { padding: 12px 16px; border-top: 1px solid var(--fl-border); display: flex; justify-content: flex-end; gap: 8px; flex-shrink: 0; }
+
+/* Currency picker */
+.cur-search { padding: 12px 20px 8px; flex-shrink: 0; }
+.cur-search input {
+  width: 100%; border: 1.5px solid var(--fl-border-strong); border-radius: var(--r-sm);
+  padding: 8px 12px; font-family: var(--font); font-size: 14px;
+  color: var(--fl-text-1); outline: none; transition: border-color 0.12s, box-shadow 0.12s;
+}
+.cur-search input:focus { border-color: var(--fl-brand); box-shadow: 0 0 0 1px var(--fl-brand); }
+.cur-search input::placeholder { color: var(--fl-text-4); }
+.cur-list { padding: 4px 8px 8px; }
+.cur-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 12px; border-radius: var(--r-sm); cursor: pointer; transition: background 0.1s;
+}
+.cur-item:hover { background: var(--fl-surface-2); }
+.cur-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--fl-brand); cursor: pointer; flex-shrink: 0; }
+.cur-code { font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--fl-text-1); min-width: 38px; }
+.cur-name { font-size: 13px; color: var(--fl-text-3); }
+
+/* JSON dialog */
+.json-dlg { width: 680px; }
+.json-confirm {
+  background: var(--fl-success-bg); border-bottom: 1px solid #B7DFB5;
+  padding: 11px 20px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-shrink: 0; position: sticky; top: 0; z-index: 2;
+}
+.json-confirm-l { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #0D4A0D; }
+.json-confirm-l svg { width: 16px; height: 16px; color: var(--fl-success); flex-shrink: 0; }
+.json-confirm-btn {
+  background: var(--fl-success); color: #fff; border: none; border-radius: var(--r-sm);
+  padding: 7px 16px; font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.12s; white-space: nowrap;
+}
+.json-confirm-btn:hover { background: #0A5E0A; }
+.json-body { padding: 16px 20px; }
+.json-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--fl-text-4); margin-bottom: 8px; }
+.json-pre {
+  background: #1E1E2E; color: #CDD6F4;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.75;
+  padding: 16px 18px; border-radius: var(--r);
+  overflow-x: auto; white-space: pre; max-height: 380px; overflow-y: auto;
+}
+
+/* scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--fl-border-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fl-text-4); }
+
+/* snackbar */
+.snack {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(50px);
+  background: #323130; color: #fff; padding: 10px 20px;
+  border-radius: var(--r); font-size: 13px; box-shadow: var(--shadow-8);
+  opacity: 0; transition: all 0.22s; z-index: 999; white-space: nowrap;
+}
+.snack.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<header class="app-bar">
+  <div class="app-bar-icon">
+    <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.9)"/>
+      <rect x="12" y="1" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+      <rect x="1" y="12" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+      <rect x="12" y="12" width="9" height="9" rx="1.5" fill="rgba(255,255,255,0.7)"/>
+    </svg>
+  </div>
+  <span class="app-bar-title">CCP Manual Reports Utility</span>
+  <div class="app-bar-div"></div>
+  <span class="app-bar-env">Operations · Risk Management</span>
+  <span class="app-bar-badge">BETA</span>
+</header>
+
+<div class="page">
+
+  <!-- Info Card -->
+  <div class="info-card">
+    <div class="info-card-hero">
+      <div class="hero-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18M9 21V9"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <h2>CCP Manual Reports Utility</h2>
+        <p>Configure and generate margin parameter payloads for Clearing Houses. Select a margin table and CCP, add currency columns, enter margin values per field, and submit to produce a structured JSON report for downstream processing.</p>
+      </div>
+      <span class="hero-tag">Ops Reporting</span>
+    </div>
+    <div class="info-steps">
+      <div class="info-step"><span class="step-num">1</span><div class="step-body"><span class="step-title">Select Table</span><span class="step-sub">Choose margin table type</span></div></div>
+      <div class="info-step"><span class="step-num">2</span><div class="step-body"><span class="step-title">Select CCP</span><span class="step-sub">Choose clearing house</span></div></div>
+      <div class="info-step"><span class="step-num">3</span><div class="step-body"><span class="step-title">Add Currencies</span><span class="step-sub">Pick one or more</span></div></div>
+      <div class="info-step"><span class="step-num">4</span><div class="step-body"><span class="step-title">Fill Values</span><span class="step-sub">Enter per-currency data</span></div></div>
+      <div class="info-step"><span class="step-num">5</span><div class="step-body"><span class="step-title">Submit</span><span class="step-sub">Generate &amp; confirm JSON</span></div></div>
+    </div>
+  </div>
+
+  <!-- Command Bar -->
+  <div class="cmd-bar">
+    <div class="cmd-left">
+      <div class="fl-field">
+        <label>Margin Table</label>
+        <div class="fl-sel-wrap">
+          <select class="fl-sel" id="tableSelect">
+            <option value="">Select table…</option>
+            <option value="equity">Equity Margin Table</option>
+            <option value="fx">FX Margin Table</option>
+            <option value="rates">Rates Margin Table</option>
+            <option value="credit">Credit Margin Table</option>
+          </select>
+          <span class="fl-chev"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5l5 5 5-5"/></svg></span>
+        </div>
+      </div>
+      <div class="fl-field">
+        <label>CCP</label>
+        <div class="fl-sel-wrap">
+          <select class="fl-sel" id="ccpSelect">
+            <option value="">Select CCP…</option>
+            <option value="lch">LCH Ltd</option>
+            <option value="eurex">Eurex Clearing</option>
+            <option value="ice">ICE Clear Europe</option>
+            <option value="cme">CME Clearing</option>
+            <option value="jscc">JSCC</option>
+            <option value="hkex">HKEX OTC Clear</option>
+            <option value="asx">ASX Clear</option>
+          </select>
+          <span class="fl-chev"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5l5 5 5-5"/></svg></span>
+        </div>
+      </div>
+    </div>
+    <div class="cmd-sep"></div>
+    <div class="cmd-right">
+      <button class="fl-btn fl-btn-ghost" id="clearBtn" onclick="clearAll()" disabled>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M2 4h12M5 4V2h6v2M6 7v5M10 7v5M3 4l1 10h8l1-10"/></svg>
+        Clear All
+      </button>
+      <button class="fl-btn fl-btn-primary" id="submitBtn" onclick="openJsonDlg()" disabled>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M2 8h10M8 4l4 4-4 4"/></svg>
+        Submit
+      </button>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="tbl-card">
+    <div class="tbl-card-head">
+      <div class="tbl-title">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="14" height="14" rx="1.5"/><path d="M1 5h14M5 5v9"/></svg>
+        <span id="cardTitle">No table selected</span>
+        <span class="tbl-meta" id="cardMeta"></span>
+      </div>
+      <div class="chip-row">
+        <div id="chipWrap" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
+        <button class="add-cur-btn" id="addCurBtn" onclick="openCurDlg()" disabled>
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M7 1v12M1 7h12"/></svg>
+          Add Currency
+        </button>
+      </div>
+    </div>
+    <div id="tableContainer">
+      <div class="empty">
+        <div class="empty-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3>No table selected</h3>
+        <p>Select a Margin Table and CCP from the toolbar above to get started.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Currency Dialog -->
+<div class="scrim" id="curScrim">
+  <div class="fl-dlg" style="width:380px;">
+    <div class="dlg-head">
+      <h3>Add Currencies</h3>
+      <p>Select currencies to add as columns in the table.</p>
+    </div>
+    <div class="cur-search">
+      <input type="text" id="curSearch" placeholder="Search by code or name…" oninput="filterCur()"/>
+    </div>
+    <div class="dlg-body"><div class="cur-list" id="curList"></div></div>
+    <div class="dlg-foot">
+      <button class="fl-btn fl-btn-ghost" onclick="closeCurDlg()">Cancel</button>
+      <button class="fl-btn fl-btn-primary" onclick="applyModal()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- JSON Dialog -->
+<div class="scrim" id="jsonScrim">
+  <div class="fl-dlg json-dlg">
+    <div class="dlg-head">
+      <h3>Generated JSON Payload</h3>
+      <p>Review the payload below. Click Confirm to submit.</p>
+    </div>
+    <div class="dlg-body">
+      <div class="json-confirm">
+        <div class="json-confirm-l">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><path d="M5 8l2.5 2.5L11 5.5"/></svg>
+          JSON generated successfully. Review and confirm to submit.
+        </div>
+        <button class="json-confirm-btn" onclick="confirmJson()">Confirm &amp; Submit</button>
+      </div>
+      <div class="json-body">
+        <div class="json-lbl">Payload</div>
+        <pre class="json-pre" id="jsonPre"></pre>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button class="fl-btn fl-btn-ghost" onclick="copyJson()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="9" height="9" rx="1.5"/><path d="M11 5V3a1.5 1.5 0 0 0-1.5-1.5h-6A1.5 1.5 0 0 0 2 3v6A1.5 1.5 0 0 0 3.5 10.5H5"/></svg>
+        Copy JSON
+      </button>
+      <button class="fl-btn fl-btn-ghost" onclick="closeJsonDlg()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="snack" id="snack"></div>
+
+<script>
+const TABLES = {
+  equity:{label:'Equity Margin Table',columns:[
+    {display:'Initial Margin Rate',logical:'initial_margin_rate',type:'percent'},
+    {display:'Maintenance Margin Rate',logical:'maintenance_margin_rate',type:'percent'},
+    {display:'Margin Call Threshold',logical:'margin_call_threshold',type:'number'},
+    {display:'Eligible Collateral',logical:'eligible_collateral',type:'boolean'},
+    {display:'Haircut Override',logical:'haircut_override',type:'percent'},
+    {display:'Concentration Limit',logical:'concentration_limit',type:'number'},
+    {display:'Remarks',logical:'remarks',type:'text'},
+    {display:'Tier Level',logical:'tier_level',type:'select',options:['Tier 1','Tier 2','Tier 3']},
+  ]},
+  fx:{label:'FX Margin Table',columns:[
+    {display:'Spot Margin Rate',logical:'spot_margin_rate',type:'percent'},
+    {display:'Forward Margin Rate',logical:'forward_margin_rate',type:'percent'},
+    {display:'Option Premium Margin',logical:'option_premium_margin',type:'number'},
+    {display:'NDF Eligible',logical:'ndf_eligible',type:'boolean'},
+    {display:'Notional Cap',logical:'notional_cap',type:'number'},
+    {display:'Settlement Type',logical:'settlement_type',type:'select',options:['Physical','Cash','NDF']},
+    {display:'Notes',logical:'notes',type:'text'},
+  ]},
+  rates:{label:'Rates Margin Table',columns:[
+    {display:'DV01 Margin Multiplier',logical:'dv01_margin_multiplier',type:'number'},
+    {display:'Duration Bucket',logical:'duration_bucket',type:'select',options:['<1Y','1Y-3Y','3Y-7Y','7Y-15Y','>15Y']},
+    {display:'Stressed Margin Rate',logical:'stressed_margin_rate',type:'percent'},
+    {display:'Hedge Credit',logical:'hedge_credit',type:'boolean'},
+    {display:'Netting Eligible',logical:'netting_eligible',type:'boolean'},
+    {display:'Base Charge',logical:'base_charge',type:'number'},
+    {display:'Comments',logical:'comments',type:'text'},
+  ]},
+  credit:{label:'Credit Margin Table',columns:[
+    {display:'CDS Spread Margin',logical:'cds_spread_margin',type:'percent'},
+    {display:'Recovery Rate',logical:'recovery_rate',type:'percent'},
+    {display:'Jump-to-Default',logical:'jump_to_default',type:'number'},
+    {display:'Rating Bucket',logical:'rating_bucket',type:'select',options:['AAA','AA','A','BBB','HY','NR']},
+    {display:'Deliverable Obligation',logical:'deliverable_obligation',type:'boolean'},
+    {display:'Restructuring Clause',logical:'restructuring_clause',type:'select',options:['CR','MR','MMR','NR']},
+    {display:'Remarks',logical:'remarks',type:'text'},
+  ]},
+};
+const CCPS={lch:'LCH Ltd',eurex:'Eurex Clearing',ice:'ICE Clear Europe',cme:'CME Clearing',jscc:'JSCC',hkex:'HKEX OTC Clear',asx:'ASX Clear'};
+const CURRENCIES=[
+  {code:'USD',name:'US Dollar'},{code:'EUR',name:'Euro'},{code:'GBP',name:'British Pound'},
+  {code:'JPY',name:'Japanese Yen'},{code:'CHF',name:'Swiss Franc'},{code:'AUD',name:'Australian Dollar'},
+  {code:'CAD',name:'Canadian Dollar'},{code:'HKD',name:'Hong Kong Dollar'},{code:'SGD',name:'Singapore Dollar'},
+  {code:'SEK',name:'Swedish Krona'},{code:'NOK',name:'Norwegian Krone'},{code:'NZD',name:'New Zealand Dollar'},
+  {code:'CNH',name:'Offshore Chinese Yuan'},{code:'INR',name:'Indian Rupee'},{code:'BRL',name:'Brazilian Real'},
+  {code:'MXN',name:'Mexican Peso'},{code:'ZAR',name:'South African Rand'},{code:'KRW',name:'South Korean Won'},
+];
+
+let tbl=null,ccp=null,curs=[],cellData={},pending=new Set();
+
+function sync(){
+  const ready=tbl&&ccp, hasCur=ready&&curs.length>0;
+  document.getElementById('addCurBtn').disabled=!ready;
+  document.getElementById('submitBtn').disabled=!hasCur;
+  document.getElementById('clearBtn').disabled=!hasCur;
+}
+
+document.getElementById('tableSelect').addEventListener('change',function(){
+  tbl=this.value||null; curs=[]; cellData={};
+  document.getElementById('cardTitle').textContent=tbl?TABLES[tbl].label:'No table selected';
+  document.getElementById('cardMeta').textContent=tbl?`· ${TABLES[tbl].columns.length} fields`:'';
+  renderChips();renderGrid();sync();
+});
+document.getElementById('ccpSelect').addEventListener('change',function(){ccp=this.value||null;sync();});
+
+function renderGrid(){
+  const el=document.getElementById('tableContainer');
+  if(!tbl){el.innerHTML=mkEmpty('No table selected','Select a Margin Table and CCP from the toolbar above to get started.');return;}
+  if(!curs.length){el.innerHTML=mkEmpty('No currencies added','Click "+ Add Currency" in the header above to add currency columns.');return;}
+  const cols=TABLES[tbl].columns;
+  let h=`<div class="grid-wrap"><table><thead><tr><th class="col-pin">Margin Column</th>`;
+  curs.forEach(c=>{h+=`<th>${c}</th>`;});
+  h+=`</tr></thead><tbody>`;
+  cols.forEach(col=>{
+    h+=`<tr><td class="col-pin"><div class="c-disp">${col.display}</div><div class="c-logic">${col.logical}</div><span class="c-type">${col.type}</span></td>`;
+    curs.forEach(cur=>{h+=`<td class="col-data">${mkCell(col,cur,cellData[cur]?.[col.logical])}</td>`;});
+    h+=`</tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  el.innerHTML=h;
+}
+
+function mkEmpty(t,s){return`<div class="empty"><div class="empty-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><h3>${t}</h3><p>${s}</p></div>`;}
+
+function mkCell(col,cur,saved){
+  const k=`${cur}__${col.logical}`;
+  const oc=`onchange="sv(this,'${cur}','${col.logical}','${col.type}')"`;
+  const oi=`oninput="sv(this,'${cur}','${col.logical}','${col.type}')"`;
+  if(col.type==='boolean')return`<div class="bool-wrap"><input type="checkbox" class="fl-toggle" data-key="${k}" ${saved?'checked':''} ${oc}/></div>`;
+  if(col.type==='select'){const o=col.options.map(x=>`<option${saved===x?' selected':''}>${x}</option>`).join('');return`<select class="c-sel" data-key="${k}" ${oc}><option value="">—</option>${o}</select>`;}
+  if(col.type==='text')return`<textarea class="c-ta" data-key="${k}" placeholder="Enter value…" ${oi}>${saved||''}</textarea>`;
+  const v=saved!==undefined&&saved!==null?saved:'';
+  return`<input type="number" step="${col.type==='percent'?'0.01':'any'}" class="c-in c-num" data-key="${k}" value="${v}" placeholder="0" ${oi}/>`;
+}
+
+function sv(el,cur,logical,type){
+  if(!cellData[cur])cellData[cur]={};
+  if(type==='boolean')cellData[cur][logical]=el.checked;
+  else if(type==='number'||type==='percent')cellData[cur][logical]=el.value===''?null:parseFloat(el.value);
+  else cellData[cur][logical]=el.value;
+}
+
+function renderChips(){
+  document.getElementById('chipWrap').innerHTML=curs.map(c=>`<span class="fl-chip">${c}<button class="fl-chip-x" onclick="removeCur('${c}')"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M1 1l8 8M9 1l-8 8"/></svg></button></span>`).join('');
+}
+function removeCur(code){curs=curs.filter(c=>c!==code);delete cellData[code];renderChips();renderGrid();sync();}
+
+function openCurDlg(){pending=new Set(curs);document.getElementById('curSearch').value='';renderCurList('');document.getElementById('curScrim').classList.add('open');setTimeout(()=>document.getElementById('curSearch').focus(),120);}
+function closeCurDlg(){document.getElementById('curScrim').classList.remove('open');}
+function filterCur(){renderCurList(document.getElementById('curSearch').value);}
+function renderCurList(q){
+  const f=CURRENCIES.filter(c=>c.code.toLowerCase().includes(q.toLowerCase())||c.name.toLowerCase().includes(q.toLowerCase()));
+  document.getElementById('curList').innerHTML=f.map(c=>`<label class="cur-item"><input type="checkbox" ${pending.has(c.code)?'checked':''} onchange="toggleP('${c.code}',this.checked)"/><span class="cur-code">${c.code}</span><span class="cur-name">${c.name}</span></label>`).join('');
+}
+function toggleP(code,checked){if(checked)pending.add(code);else pending.delete(code);}
+function applyModal(){
+  curs=curs.filter(c=>pending.has(c));
+  Object.keys(cellData).forEach(c=>{if(!pending.has(c))delete cellData[c];});
+  pending.forEach(c=>{if(!curs.includes(c))curs.push(c);});
+  closeCurDlg();renderChips();renderGrid();sync();
+}
+document.getElementById('curScrim').addEventListener('click',e=>{if(e.target===document.getElementById('curScrim'))closeCurDlg();});
+
+function clearAll(){cellData={};renderGrid();}
+
+function buildPayload(){
+  const cols=TABLES[tbl].columns;
+  const p={table:tbl,tableLabel:TABLES[tbl].label,ccp,ccpLabel:CCPS[ccp],generatedAt:new Date().toISOString(),currencies:{}};
+  curs.forEach(cur=>{
+    p.currencies[cur]={};
+    cols.forEach(col=>{
+      const el=document.querySelector(`[data-key="${cur}__${col.logical}"]`);
+      if(!el)return;
+      if(col.type==='boolean')p.currencies[cur][col.logical]=el.checked;
+      else if(col.type==='number'||col.type==='percent')p.currencies[cur][col.logical]=el.value===''?null:parseFloat(el.value);
+      else p.currencies[cur][col.logical]=el.value||null;
+    });
+  });
+  return p;
+}
+function openJsonDlg(){document.getElementById('jsonPre').textContent=JSON.stringify(buildPayload(),null,2);document.getElementById('jsonScrim').classList.add('open');}
+function closeJsonDlg(){document.getElementById('jsonScrim').classList.remove('open');}
+function confirmJson(){closeJsonDlg();showSnack('Payload confirmed. No further action taken.');}
+function copyJson(){navigator.clipboard.writeText(document.getElementById('jsonPre').textContent).then(()=>showSnack('JSON copied to clipboard'));}
+document.getElementById('jsonScrim').addEventListener('click',e=>{if(e.target===document.getElementById('jsonScrim'))closeJsonDlg();});
+
+function showSnack(msg){const el=document.getElementById('snack');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600);}
+</script>
+</body>
+</html>
